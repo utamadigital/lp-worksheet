@@ -62,7 +62,7 @@ export default function HeroSection({
                 Print ulang
               </span>
 			  <span className="inline-flex items-center rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
-                Gratis update
+                Gratis update selamanya
               </span>
             </div>
 
