@@ -118,7 +118,7 @@ export default function HeroSection({
             </div>
 
             <p className="mt-3 text-xs text-slate-600">
-              Checkout otomatis — setelah bayar,{" "}
+              Checkout otomatis - setelah bayar,{" "}
               <span className="font-semibold text-slate-800">link download langsung muncul</span>.
             </p>
 

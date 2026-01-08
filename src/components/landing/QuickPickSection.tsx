@@ -42,7 +42,7 @@ export default function QuickPickSection({
       id: "basic",
       title: "Basic (mulai dari sini)",
       subtitle:
-        "Cocok untuk mulai rutinitas — anak bisa langsung aktivitas harian tanpa gadget.",
+        "Cocok untuk mulai rutinitas - anak bisa langsung aktivitas harian tanpa gadget.",
       badgeText: "Terlaris",
       badgeTone: "amber",
       price: basicPrice,
@@ -73,7 +73,7 @@ export default function QuickPickSection({
             <p className="mt-1 text-sm text-slate-600">
               {selectedId
                 ? "Mantap. Scroll sedikit untuk lihat ringkasan & checkout."
-                : "Belum pilih paket. Pilih salah satu dulu—baru tombol checkout aktif."}
+                : "Belum pilih paket. Pilih salah satu dulu-baru tombol checkout aktif."}
             </p>
           </div>
 

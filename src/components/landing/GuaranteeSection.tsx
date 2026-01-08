@@ -102,7 +102,7 @@ export default function GuaranteeSection({ ctaHref = "#pricing" }: { ctaHref?: s
             Saran kami: pilih Bundle kalau ingin lebih banyak variasi
           </p>
           <p className="mt-2 text-sm text-slate-700">
-            Lebih hemat untuk pemakaian jangka panjang — anak tidak cepat bosan karena materinya beragam.
+            Lebih hemat untuk pemakaian jangka panjang - anak tidak cepat bosan karena materinya beragam.
           </p>
         </div>
       </div>

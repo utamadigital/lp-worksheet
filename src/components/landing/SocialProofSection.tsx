@@ -87,7 +87,7 @@ export default function SocialProofSection({ ctaHref = "#pricing" }: Props) {
             </p>
 
             <p className="mt-2 text-base font-semibold leading-relaxed text-slate-900 md:text-lg">
-              “Anak jadi lebih mau belajar karena aktivitasnya bertahap. Saya nggak bingung mulai dari mana.”
+              “Anak jadi lebih mau belajar karena aktivitasnya bertahap. Ada jadwalnya juga untuk 30 Hari, saya jadi nggak bingung mulai dari mana.”
             </p>
 
             <div className="mt-4">

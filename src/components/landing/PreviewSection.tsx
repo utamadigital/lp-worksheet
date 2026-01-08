@@ -83,7 +83,7 @@ function Slider({
           {/* Mobile hint */}
           {canNav && (
             <div className="absolute right-2 top-2 rounded-full bg-slate-900/70 px-2.5 py-1 text-[11px] font-semibold text-white lg:hidden">
-              Tap dots
+              Ketuk Titik
             </div>
           )}
         </div>
