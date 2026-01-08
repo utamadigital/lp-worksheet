@@ -28,9 +28,71 @@ function Item({ children }: { children: React.ReactNode }) {
   );
 }
 
+function Modal({
+  titleId,
+  onClose,
+  title,
+  subtitle,
+  children,
+}: {
+  titleId: string;
+  onClose: () => void;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="fixed inset-0 z-[80]">
+      <div
+        className="absolute inset-0 bg-slate-900/40"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p id={titleId} className="text-base font-extrabold text-slate-900">
+                {title}
+              </p>
+              {subtitle ? (
+                <p className="mt-1 text-xs text-slate-600">{subtitle}</p>
+              ) : null}
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
+              aria-label="Tutup"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="mt-4">{children}</div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function BundleContentsBox({ className }: Props) {
-  const detailsId = useId();
-  const [open, setOpen] = useState(false);
+  const modalTitleId = useId();
+  const [show, setShow] = useState(false);
 
   const umumSeries = useMemo(
     () => [
@@ -75,7 +137,7 @@ export default function BundleContentsBox({ className }: Props) {
             Paket Islami (1.000+ lembar) + Umum 1.200+ lembar
           </p>
           <p className="mt-1 text-xs text-slate-700">
-            Ini <span className="font-bold">bukan bonus</span> - memang{" "}
+            Ini <span className="font-bold">bukan bonus</span> — memang{" "}
             <span className="font-bold">isi Paket Bundle</span> supaya variasi
             aktivitas lebih banyak.
           </p>
@@ -87,17 +149,18 @@ export default function BundleContentsBox({ className }: Props) {
           </div>
         </div>
 
+        {/* ✅ tombol Detail -> POPUP */}
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation(); // penting biar ga ikut select plan
+            setShow(true);
+          }}
           className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-extrabold text-emerald-800 shadow-sm ring-1 ring-emerald-200 hover:bg-emerald-50 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-          aria-expanded={open}
-          aria-controls={detailsId}
         >
-          {open ? "Tutup" : "Detail"}
-          <ChevronDown
-            className={cn("h-4 w-4 transition-transform", open && "rotate-180")}
-          />
+          Detail
+          <ChevronDown className="h-4 w-4" />
         </button>
       </div>
 
@@ -131,7 +194,7 @@ export default function BundleContentsBox({ className }: Props) {
             </span>
             <div className="min-w-0">
               <p className="text-sm font-extrabold text-slate-900">
-                Worksheet Umum - 12 seri
+                Worksheet Umum — 12 seri
               </p>
               <p className="mt-0.5 text-xs text-slate-600">
                 Pelengkap variasi aktivitas (biar anak nggak cepat bosan).
@@ -155,38 +218,32 @@ export default function BundleContentsBox({ className }: Props) {
         </div>
       </div>
 
-      {/* Detail (expand) */}
-      <div
-        id={detailsId}
-        className={cn(
-          "overflow-hidden transition-[max-height,opacity] duration-300",
-          open ? "mt-4 max-h-[900px] opacity-100" : "max-h-0 opacity-0"
-        )}
-      >
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-sm font-extrabold text-slate-900">
-            Detail 12 seri Worksheet Umum
-          </p>
-          <p className="mt-1 text-xs text-slate-600">
-            Cocok untuk selingan aktivitas harian setelah sesi Islami.
-          </p>
+      {/* ✅ POPUP Detail */}
+      {show ? (
+        <Modal
+          titleId={modalTitleId}
+          onClose={() => setShow(false)}
+          title="Detail 12 Seri Worksheet Umum"
+          subtitle="Cocok untuk selingan aktivitas harian setelah sesi Islami. Total lebih dari 1.200 lembar."
+        >
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <div className="grid gap-2 sm:grid-cols-2">
+              {umumSeries.map((t) => (
+                <div
+                  key={t}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
+                >
+                  {t}
+                </div>
+              ))}
+            </div>
 
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {umumSeries.map((t) => (
-              <div
-                key={t}
-                className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700"
-              >
-                {t}
-              </div>
-            ))}
+            <p className="mt-3 text-[11px] text-slate-500">
+              
+            </p>
           </div>
-
-          <p className="mt-3 text-[11px] text-slate-500">
-            Ini termasuk isi Paket Bundle (bukan bump/add-on).
-          </p>
-        </div>
-      </div>
+        </Modal>
+      ) : null}
     </div>
   );
 }
