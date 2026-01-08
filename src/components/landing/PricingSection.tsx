@@ -360,6 +360,7 @@ export default function PricingSection({
           <RiskBadge>Akses instan</RiskBadge>
           <RiskBadge>Garansi download 100%</RiskBadge>
           <RiskBadge>Print ulang seumur hidup</RiskBadge>
+		  <RiskBadge>Gratis update worksheeet</RiskBadge>
         </div>
       </div>
 
