@@ -81,10 +81,7 @@ export default function HeroSection({
                 Normal <span className="line-through">Rp {formatIDR(normal)}</span> →{" "}
                 <span className="font-extrabold">Promo Rp {formatIDR(promo)}</span>
               </span>
-              <span className="text-emerald-700">•</span>
-              <span>
-                ≈ <span className="font-extrabold">Rp {formatIDR(perPage)}</span> / lembar
-              </span>
+             
             </div>
 
             <ul className="mt-5 space-y-2 text-sm text-slate-700">
