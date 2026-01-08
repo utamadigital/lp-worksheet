@@ -412,11 +412,7 @@ export default function PricingSection({
 
                   <PriceLine price={plan.price} compareAt={planCompareAt} />
 
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    <RiskBadge>Garansi download 100%</RiskBadge>
-                    <RiskBadge>Dibantu sampai berhasil</RiskBadge>
-                    <RiskBadge>Lifetime access</RiskBadge>
-                  </div>
+                  
 
                   <p className="mt-2 text-sm leading-relaxed text-slate-600">
                     {desc}
