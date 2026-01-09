@@ -8,6 +8,25 @@ function formatIDR(n: number) {
   return `Rp ${Math.round(n).toLocaleString("id-ID")}`;
 }
 
+function scrollToPricingAndFocus() {
+  const el = document.getElementById("pricing");
+  if (!el) return;
+
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  // highlight section (sementara)
+  el.classList.add("ud-highlight");
+  window.setTimeout(() => el.classList.remove("ud-highlight"), 1400);
+
+  // fokuskan kartu pertama
+  window.setTimeout(() => {
+    const firstCard = document.querySelector("#pricing [role='radio']") as
+      | HTMLElement
+      | null;
+    firstCard?.focus?.();
+  }, 450);
+}
+
 export default function StickyFloatingCTA({
   checkoutUrl,
   promoPrice,
@@ -26,8 +45,9 @@ export default function StickyFloatingCTA({
 }) {
   const { open } = useCheckoutModal();
   const [show, setShow] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
-  // ✅ jika user belum memilih paket, jangan tampilkan sticky CTA
+  // ✅ canCheckout: hanya true jika paket sudah dipilih
   const canCheckout = !!checkoutUrl && promoPrice > 0 && compareAtPrice > 0;
 
   const packNormal = compareAtPrice;
@@ -44,119 +64,115 @@ export default function StickyFloatingCTA({
   }, [packNormal, packPromo]);
 
   const savingsPct = useMemo(() => {
-    if (!packNormal) return 0;
+    if (packNormal <= 0) return 0;
     return Math.round((savings / packNormal) * 100);
   }, [savings, packNormal]);
 
   useEffect(() => {
-    if (!canCheckout) {
-      setShow(false);
-      return;
-    }
-
-    let ctaInView = false;
-
-    const pricingCta = document.querySelector(
-      '#pricing [data-track="initiate_checkout"]'
-    ) as HTMLElement | null;
-
-    const observer =
-      pricingCta &&
-      new IntersectionObserver(
-        ([entry]) => {
-          ctaInView = !!entry?.isIntersecting;
-          update();
-        },
-        {
-          root: null,
-          threshold: 0.12,
-        }
-      );
-
-    if (pricingCta && observer) observer.observe(pricingCta);
-
-    function update() {
+    const onScroll = () => {
       const y = window.scrollY || 0;
-
-      // jangan ganggu kalau udah mendekati bawah (Guarantee/FAQ/footer)
-      const nearBottom =
-        window.innerHeight + y >= document.documentElement.scrollHeight - 220;
-
-      const visible = y > showAfterPx && !nearBottom && !ctaInView;
-      setShow(visible);
-    }
-
-    function onScroll() {
-      update();
-    }
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-
-    update();
-
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      observer?.disconnect();
+      const shouldShow = y > showAfterPx;
+      setShow(shouldShow);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showAfterPx, canCheckout]);
 
-  if (!show || !canCheckout) return null;
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [showAfterPx]);
+
+  function showToast(msg: string) {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 1600);
+  }
+
+  if (!show) return null;
 
   return (
-    <div className="fixed left-1/2 z-50 w-[min(760px,calc(100%-1.5rem))] -translate-x-1/2 bottom-[calc(env(safe-area-inset-bottom)+1rem)]">
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-lg backdrop-blur sm:px-5">
-        <div className="min-w-0">
-          <div className="text-[11px] leading-tight text-slate-600 sm:text-sm whitespace-normal">
-            Normal{" "}
-            <span className="line-through">{formatIDR(packNormal)}</span>{" "}
-            <span className="mx-1">→</span>
-            <span className="text-emerald-700">
-              Promo {formatIDR(packPromo)}
-            </span>{" "}
-            <span className="text-emerald-700/90">(Hemat {savingsPct}%)</span>
+    <>
+      <style jsx global>{`
+        .ud-highlight {
+          outline: 4px solid rgba(251, 191, 36, 0.55);
+          border-radius: 24px;
+          box-shadow: 0 0 0 10px rgba(251, 191, 36, 0.15);
+          animation: udPulse 1.2s ease-in-out 1;
+        }
+        @keyframes udPulse {
+          0% {
+            box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.25);
+          }
+          50% {
+            box-shadow: 0 0 0 14px rgba(251, 191, 36, 0.18);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
+          }
+        }
+      `}</style>
 
-            {bumpSelected ? (
-              <span className="mt-1 block w-fit items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 sm:mt-0 sm:ml-2 sm:inline-flex sm:text-xs">
-                + Add-on {formatIDR(bumpPrice)}
-              </span>
-            ) : null}
-          </div>
+      {toast && (
+        <div className="fixed bottom-24 left-1/2 z-[60] w-[92%] max-w-sm -translate-x-1/2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-lg">
+          {toast}
+        </div>
+      )}
 
-          <div className="mt-0.5 text-base font-extrabold leading-tight text-slate-900 sm:text-lg">
-            Total: {formatIDR(totalPrice)}
-          </div>
+      <div className="fixed bottom-0 left-0 right-0 z-[50] border-t border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-semibold text-slate-600">
+              Checkout instan
+            </p>
 
-          <div className="mt-0.5 text-xs leading-tight text-slate-600 sm:text-sm whitespace-normal">
-            {bumpSelected ? (
-              <>
-                Termasuk add-on{" "}
-                <span className="font-semibold">{formatIDR(bumpPrice)}</span>. Hemat{" "}
-                <span className="font-semibold">{formatIDR(savings)}</span> dari harga normal.
-              </>
+            {canCheckout ? (
+              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="text-sm font-extrabold text-slate-900">
+                  {`Rp ${formatIDR(totalPrice)}`}
+                </span>
+                <span className="text-[11px] font-semibold text-slate-500 line-through">
+                  {`Rp ${formatIDR(packNormal)}`}
+                </span>
+                {savingsPct > 0 ? (
+                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700 ring-1 ring-emerald-200">
+                    Hemat {savingsPct}%
+                  </span>
+                ) : null}
+              </div>
             ) : (
-              <>
-                Hemat <span className="font-semibold">{formatIDR(savings)}</span> dari harga normal.
-              </>
+              <p className="mt-0.5 text-sm font-extrabold text-slate-900">
+                Pilih paket dulu
+              </p>
             )}
           </div>
+
+          <button
+            type="button"
+            data-track="initiate_checkout"
+            onClick={() => {
+              if (!canCheckout) {
+                showToast("Pilih salah satu paket dulu ya 😊");
+                scrollToPricingAndFocus();
+                return;
+              }
+              open(checkoutUrl);
+            }}
+            className={[
+              "inline-flex h-12 items-center justify-center rounded-2xl px-4 text-sm font-extrabold transition active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-emerald-200",
+              canCheckout
+                ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                : "bg-slate-200 text-slate-600",
+            ].join(" ")}
+          >
+            {canCheckout ? "Checkout & Download Instan" : "Pilih paket dulu"}
+          </button>
         </div>
 
-        <button
-          type="button"
-          data-track="initiate_checkout"
-          onClick={() => {
-            if (!checkoutUrl) return;
-            open(checkoutUrl);
-          }}
-          className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 sm:h-12 sm:px-7"
-          aria-label="Checkout"
-        >
-          Checkout
-        </button>
+        {!canCheckout ? (
+          <div className="mx-auto max-w-6xl px-4 pb-3">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
+              Tap salah satu kartu paket di atas untuk mengaktifkan tombol checkout.
+            </div>
+          </div>
+        ) : null}
       </div>
-    </div>
+    </>
   );
 }

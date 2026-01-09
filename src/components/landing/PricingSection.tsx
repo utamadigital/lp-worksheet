@@ -398,6 +398,12 @@ export default function PricingSection({
         </div>
       </div>
 
+
+      <p className="mt-4 text-sm font-semibold text-slate-700">
+        <span className="font-extrabold text-slate-900">Langkah 1:</span> Tap salah satu kartu paket di bawah.
+        <span className="ml-1 text-slate-600">Langkah 2: klik checkout.</span>
+      </p>
+
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {/* LEFT: Plans */}
         <div className="space-y-4" role="radiogroup" aria-label="Pilih paket">
@@ -596,9 +602,21 @@ export default function PricingSection({
           </button>
 
           {!selectedPlan ? (
-            <p className="mt-2 text-center text-xs text-slate-600">
-              Silakan pilih produk dulu untuk melanjutkan checkout.
-            </p>
+            <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-amber-900">
+                  ⚠️
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-extrabold text-amber-900">
+                    Langkah 1: Pilih paket dulu untuk lanjut checkout
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-amber-800">
+                    Tap salah satu kartu paket di atas. Setelah dipilih, tombol checkout akan aktif.
+                  </p>
+                </div>
+              </div>
+            </div>
           ) : null}
 
           <RiskReversalBox />
