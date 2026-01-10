@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState, useRef } from "react";
 import { useMemo, useState } from "react";
 import { track } from "@/lib/tracking";
 import ContentIndexSection from "./ContentIndexSection";
@@ -52,19 +53,23 @@ export default function LandingPageClient() {
 
   // ✅ AddToCart hanya saat user benar-benar memilih paket (bukan default)
   const handleSelectPlan = (id: PlanId) => {
-    if (selectedId === id) return;
+  // ✅ Guard super-aman: cegah double fire bahkan saat klik cepat sekali
+  if (selectedId === id) return;
+  if (lastSelectedRef.current === id) return;
 
-    const value = id === "basic" ? PRICE_BASIC : PRICE_BUNDLE;
-    track("AddToCart", {
-      content_type: "product",
-      content_ids: [id],
-      content_name: id === "basic" ? "Basic" : "Bundle",
-      value,
-      currency: "IDR",
-    });
+  lastSelectedRef.current = id; // set dulu, sebelum track (anti race)
 
-    setSelectedId(id);
-  };
+  const value = id === "basic" ? PRICE_BASIC : PRICE_BUNDLE;
+  track("AddToCart", {
+    content_type: "product",
+    content_ids: [id],
+    content_name: id === "basic" ? "Basic" : "Bundle",
+    value,
+    currency: "IDR",
+  });
+
+  setSelectedId(id);
+};
 
   const plans = useMemo(
     () => [
@@ -108,6 +113,9 @@ export default function LandingPageClient() {
   };
 
   const goToPreview = () => scrollToId("preview");
+  
+  const lastSelectedRef = useRef<PlanId | null>(null);
+
 
   return (
     <CheckoutModalProvider>
