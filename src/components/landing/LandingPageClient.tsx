@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, useRef } from "react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { track } from "@/lib/tracking";
+
 import ContentIndexSection from "./ContentIndexSection";
 import HeroSection from "./HeroSection";
 import QuickPickSection from "./QuickPickSection";
@@ -42,7 +42,6 @@ const CHECKOUT_LINKS: Record<PlanId, { noBump: string; bump: string }> = {
 function scrollToId(id: string) {
   const el = document.getElementById(id);
   if (!el) return;
-
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -51,25 +50,30 @@ export default function LandingPageClient() {
   const [selectedId, setSelectedId] = useState<PlanId | null>(null);
   const [bumpSelected, setBumpSelected] = useState(false);
 
+  // ✅ Guard super-aman: cegah double fire bahkan saat spam tap sangat cepat
+  const lastSelectedRef = useRef<PlanId | null>(null);
+
   // ✅ AddToCart hanya saat user benar-benar memilih paket (bukan default)
   const handleSelectPlan = (id: PlanId) => {
-  // ✅ Guard super-aman: cegah double fire bahkan saat klik cepat sekali
-  if (selectedId === id) return;
-  if (lastSelectedRef.current === id) return;
+    // jika klik kartu yg sama, jangan trigger lagi
+    if (selectedId === id) return;
 
-  lastSelectedRef.current = id; // set dulu, sebelum track (anti race)
+    // anti race: kalau user double-tap super cepat sebelum state commit
+    if (lastSelectedRef.current === id) return;
+    lastSelectedRef.current = id;
 
-  const value = id === "basic" ? PRICE_BASIC : PRICE_BUNDLE;
-  track("AddToCart", {
-    content_type: "product",
-    content_ids: [id],
-    content_name: id === "basic" ? "Basic" : "Bundle",
-    value,
-    currency: "IDR",
-  });
+    const value = id === "basic" ? PRICE_BASIC : PRICE_BUNDLE;
 
-  setSelectedId(id);
-};
+    track("AddToCart", {
+      content_type: "product",
+      content_ids: [id],
+      content_name: id === "basic" ? "Basic" : "Bundle",
+      value,
+      currency: "IDR",
+    });
+
+    setSelectedId(id);
+  };
 
   const plans = useMemo(
     () => [
@@ -85,11 +89,8 @@ export default function LandingPageClient() {
     return bumpSelected ? links.bump : links.noBump;
   }, [selectedId, bumpSelected]);
 
-  const promoPrice = selectedId
-    ? plans.find((p) => p.id === selectedId)?.price ?? 0
-    : 0;
+  const promoPrice = selectedId ? plans.find((p) => p.id === selectedId)?.price ?? 0 : 0;
   const compareAtPrice = selectedId ? COMPARE_AT[selectedId] : 0;
-
 
   const goToPricing = () => {
     scrollToId("pricing");
@@ -98,80 +99,64 @@ export default function LandingPageClient() {
     // Kalau sudah pilih, fokuskan tombol checkout.
     window.setTimeout(() => {
       if (!selectedId) {
-        const firstCard = document.querySelector(
-          "#pricing [role='radio']"
-        ) as HTMLElement | null;
+        const firstCard = document.querySelector("#pricing [role='radio']") as HTMLElement | null;
         firstCard?.focus?.();
         return;
       }
 
-      const cta = document.querySelector(
-        '#pricing [data-track="initiate_checkout"]'
-      ) as HTMLElement | null;
+      const cta = document.querySelector('#pricing [data-track="initiate_checkout"]') as
+        | HTMLElement
+        | null;
       cta?.focus?.();
     }, 350);
   };
 
   const goToPreview = () => scrollToId("preview");
-  
-  const lastSelectedRef = useRef<PlanId | null>(null);
-
 
   return (
     <CheckoutModalProvider>
       <div className="bg-slate-50">
-      {/* HERO */}
-      <HeroSection onPrimary={goToPricing} onSecondary={goToPreview} />
+        {/* HERO */}
+        <HeroSection onPrimary={goToPricing} onSecondary={goToPreview} />
 
-      {/* 1) Quick pick (sekali saja) */}
-      <div className="mt-6">
-        <QuickPickSection selectedId={selectedId} onPick={handleSelectPlan} />
-      </div>
-
-      {/* 2) Mini proof strip SEBELUM pricing (lebih kebaca + bikin aman dulu) */}
-      <div className="mt-4">
-        <MiniProofStrip />
-      </div>
-
-      {/* 3) Pricing: keputusan beli lebih cepat */}
-      <PricingSection
-        plans={plans}
-        selectedId={selectedId}
-        onSelect={handleSelectPlan}
-        bumpSelected={bumpSelected}
-        onToggleBump={setBumpSelected}
-        bumpPrice={BUMP_PRICE}
-        checkoutUrl={checkoutUrl}
-      />
-
-      {/* Mini divider: transisi halus dari keputusan harga -> bukti sosial */}
-      <div className="mx-auto max-w-screen-xl px-5 sm:px-6 lg:px-10">
-        <div className="mt-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-200" />
-          <span className="shrink-0 text-xs font-extrabold text-slate-500">
-            Dipakai &amp; disukai orang tua
-          </span>
-          <div className="h-px flex-1 bg-slate-200" />
+        {/* 1) Quick pick (sekali saja) */}
+        <div className="mt-6">
+          <QuickPickSection selectedId={selectedId} onPick={handleSelectPlan} />
         </div>
-      </div>
 
-      {/* sisanya: bukti + edukasi */}
-      <SocialProofSection ctaHref="#pricing" />
-      <PreviewSection />
-<ContentIndexSection />
-      <HowItWorksSection onCTA={goToPricing} />
-      <BonusSection />
-      <FAQSection />
-      <GuaranteeSection />
+        {/* 2) Mini proof strip SEBELUM pricing (lebih kebaca + bikin aman dulu) */}
+        <div className="mt-4">
+          <MiniProofStrip />
+        </div>
 
-      {/* Floating CTA (langsung ke link checkout sesuai paket terpilih) */}
-      <StickyFloatingCTA
-        checkoutUrl={checkoutUrl}
-        promoPrice={promoPrice}
-        compareAtPrice={compareAtPrice}
-        bumpSelected={bumpSelected}
-        bumpPrice={BUMP_PRICE}
-      />
+        {/* 3) Pricing */}
+        <PricingSection
+          plans={plans}
+          selectedId={selectedId}
+          onSelect={handleSelectPlan}
+          bumpSelected={bumpSelected}
+          onToggleBump={setBumpSelected}
+          bumpPrice={BUMP_PRICE}
+          checkoutUrl={checkoutUrl}
+        />
+
+        {/* Bukti + edukasi */}
+        <SocialProofSection ctaHref="#pricing" />
+        <PreviewSection />
+        <ContentIndexSection />
+        <HowItWorksSection onCTA={goToPricing} />
+        <BonusSection />
+        <FAQSection />
+        <GuaranteeSection />
+
+        {/* Floating CTA */}
+        <StickyFloatingCTA
+          checkoutUrl={checkoutUrl}
+          promoPrice={promoPrice}
+          compareAtPrice={compareAtPrice}
+          bumpSelected={bumpSelected}
+          bumpPrice={BUMP_PRICE}
+        />
       </div>
     </CheckoutModalProvider>
   );
