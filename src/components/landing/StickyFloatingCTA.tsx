@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { track } from "@/lib/tracking";
+import { useEffect, useMemo, useState } from "react";
 import { useCheckoutModal } from "./CheckoutModalProvider";
 
 function formatIDR(n: number) {
@@ -48,7 +47,7 @@ export default function StickyFloatingCTA({
   const [show, setShow] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  // ✅ canCheckout: hanya true jika paket sudah dipilih (url sudah ada + harga valid)
+  // ✅ canCheckout: hanya true jika paket sudah dipilih
   const canCheckout = !!checkoutUrl && promoPrice > 0 && compareAtPrice > 0;
 
   const packNormal = compareAtPrice;
@@ -69,13 +68,11 @@ export default function StickyFloatingCTA({
     return Math.round((savings / packNormal) * 100);
   }, [savings, packNormal]);
 
-  // ✅ Guard: IC hanya sekali per pageview (anti double fire jika user klik berulang)
-  const icFiredRef = useRef(false);
-
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY || 0;
-      setShow(y > showAfterPx);
+      const shouldShow = y > showAfterPx;
+      setShow(shouldShow);
     };
 
     onScroll();
@@ -87,28 +84,6 @@ export default function StickyFloatingCTA({
     setToast(msg);
     window.setTimeout(() => setToast(null), 1600);
   }
-
-  const handleClick = () => {
-    // 🚫 BLOK TOTAL: jangan pernah open modal / track IC jika paket belum dipilih
-    if (!canCheckout) {
-      showToast("Pilih salah satu paket dulu ya 😊");
-      scrollToPricingAndFocus();
-      return;
-    }
-
-    // ✅ Track IC hanya saat modal benar-benar dibuka
-    if (!icFiredRef.current) {
-      icFiredRef.current = true;
-
-      track("InitiateCheckout", {
-        content_type: "product",
-        value: totalPrice,
-        currency: "IDR",
-      });
-    }
-
-    open(checkoutUrl);
-  };
 
   if (!show) return null;
 
@@ -150,10 +125,10 @@ export default function StickyFloatingCTA({
             {canCheckout ? (
               <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="text-sm font-extrabold text-slate-900">
-                  {formatIDR(totalPrice)}
+                  {`Rp ${formatIDR(totalPrice)}`}
                 </span>
                 <span className="text-[11px] font-semibold text-slate-500 line-through">
-                  {formatIDR(packNormal)}
+                  {`Rp ${formatIDR(packNormal)}`}
                 </span>
                 {savingsPct > 0 ? (
                   <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700 ring-1 ring-emerald-200">
@@ -170,15 +145,19 @@ export default function StickyFloatingCTA({
 
           <button
             type="button"
-            data-track="initiate_checkout"
-            onClick={handleClick}
-            disabled={!canCheckout}
-            aria-disabled={!canCheckout}
+            onClick={() => {
+              if (!canCheckout) {
+                showToast("Pilih salah satu paket dulu ya 😊");
+                scrollToPricingAndFocus();
+                return;
+              }
+              open(checkoutUrl);
+            }}
             className={[
-              "inline-flex h-12 items-center justify-center rounded-2xl px-4 text-sm font-extrabold transition focus:outline-none focus:ring-2 focus:ring-emerald-200",
+              "inline-flex h-12 items-center justify-center rounded-2xl px-4 text-sm font-extrabold transition active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-emerald-200",
               canCheckout
-                ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
-                : "cursor-not-allowed bg-slate-200 text-slate-600",
+                ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                : "bg-slate-200 text-slate-600",
             ].join(" ")}
           >
             {canCheckout ? "Checkout & Download Instan" : "Pilih paket dulu"}

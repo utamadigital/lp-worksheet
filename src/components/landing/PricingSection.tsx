@@ -585,7 +585,6 @@ export default function PricingSection({
 
           <button
             type="button"
-            data-track="initiate_checkout"
             disabled={!canCheckout}
             onClick={() => {
               if (!canCheckout) return;

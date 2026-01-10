@@ -104,7 +104,7 @@ export default function LandingPageClient() {
         return;
       }
 
-      const cta = document.querySelector('#pricing [data-track="initiate_checkout"]') as
+      const cta = document.querySelector('#pricing button:not([disabled])') as
         | HTMLElement
         | null;
       cta?.focus?.();
