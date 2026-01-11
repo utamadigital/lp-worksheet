@@ -61,7 +61,6 @@ export default function StickyFloatingCTA({
     if (packNormal <= 0) return 0;
     return Math.round((savings / packNormal) * 100);
   }, [savings, packNormal]);
-  }, [canCheckout, totalPrice]);
 
   useEffect(() => {
     const onScroll = () => {
