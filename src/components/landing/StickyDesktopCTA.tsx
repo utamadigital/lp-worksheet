@@ -1,21 +1,24 @@
 "use client";
 
-import { useCheckoutModal } from "./CheckoutModalProvider";
-
 export default function StickyDesktopCTA({ href }: { href: string }) {
-  const { open } = useCheckoutModal();
+  const canGo = !!href;
+
   return (
-    <div className="fixed bottom-6 right-6 z-40 hidden md:block">
-      <button
-        type="button"
-        onClick={() => open(href)}
-        className="flex items-center gap-3 rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-lg hover:bg-emerald-700"
-      >
-        Checkout
-        <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">
-          Rp 69rb+
-        </span>
-      </button>
-    </div>
+    <button
+      type="button"
+      onClick={() => {
+        if (!canGo) return;
+        window.location.href = href; // ✅ full-page redirect
+      }}
+      disabled={!canGo}
+      className={[
+        "hidden md:inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-extrabold transition focus:outline-none focus:ring-2 focus:ring-emerald-200",
+        canGo
+          ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
+          : "cursor-not-allowed bg-slate-200 text-slate-600",
+      ].join(" ")}
+    >
+      Checkout &amp; Download Instan
+    </button>
   );
 }

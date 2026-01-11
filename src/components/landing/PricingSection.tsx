@@ -3,7 +3,6 @@
 import { useMemo, useId, useState } from "react";
 import { Check } from "lucide-react";
 import BundleContentsBox from "./BundleContentsBox";
-import { useCheckoutModal } from "./CheckoutModalProvider";
 import BumpBox from "./BumpBox";
 
 
@@ -359,7 +358,6 @@ export default function PricingSection({
   bumpPrice: number;
   checkoutUrl: string;
 }) {
-  const { open } = useCheckoutModal();
   const selectedPlan = selectedId
     ? plans.find((p) => p.id === selectedId) ?? null
     : null;
@@ -588,7 +586,7 @@ export default function PricingSection({
             disabled={!canCheckout}
             onClick={() => {
               if (!canCheckout) return;
-              open(checkoutUrl);
+              window.location.href = checkoutUrl;
             }}
             className={[
               "mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl px-4 text-sm font-extrabold shadow-sm transition active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-emerald-200",

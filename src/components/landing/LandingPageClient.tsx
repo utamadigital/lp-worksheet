@@ -15,8 +15,6 @@ import BonusSection from "./BonusSection";
 import FAQSection from "./FAQSection";
 import GuaranteeSection from "./GuaranteeSection";
 import StickyFloatingCTA from "./StickyFloatingCTA";
-import CheckoutModalProvider from "./CheckoutModalProvider";
-
 const PRICE_BASIC = 69_000;
 const PRICE_BUNDLE = 99_000;
 const BUMP_PRICE = 19_000;
@@ -114,7 +112,7 @@ export default function LandingPageClient() {
   const goToPreview = () => scrollToId("preview");
 
   return (
-    <CheckoutModalProvider>
+    
       <div className="bg-slate-50">
         {/* HERO */}
         <HeroSection onPrimary={goToPricing} onSecondary={goToPreview} />
@@ -158,6 +156,6 @@ export default function LandingPageClient() {
           bumpPrice={BUMP_PRICE}
         />
       </div>
-    </CheckoutModalProvider>
+    
   );
 }

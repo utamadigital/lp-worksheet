@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useCheckoutModal } from "./CheckoutModalProvider";
 
 function formatIDR(n: number) {
-  // Format: "Rp 69.000"
   return `Rp ${Math.round(n).toLocaleString("id-ID")}`;
 }
 
@@ -43,11 +41,10 @@ export default function StickyFloatingCTA({
   /** muncul setelah user scroll minimal sekian px */
   showAfterPx?: number;
 }) {
-  const { open } = useCheckoutModal();
   const [show, setShow] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  // ✅ canCheckout: hanya true jika paket sudah dipilih
+  // ✅ hanya aktif jika paket sudah dipilih
   const canCheckout = !!checkoutUrl && promoPrice > 0 && compareAtPrice > 0;
 
   const packNormal = compareAtPrice;
@@ -58,21 +55,23 @@ export default function StickyFloatingCTA({
     [packPromo, bumpSelected, bumpPrice]
   );
 
-  const savings = useMemo(() => {
-    // Savings hanya dari diskon paket (add-on tidak dianggap diskon)
-    return Math.max(0, packNormal - packPromo);
-  }, [packNormal, packPromo]);
+  const savings = useMemo(() => Math.max(0, packNormal - packPromo), [packNormal, packPromo]);
 
   const savingsPct = useMemo(() => {
     if (packNormal <= 0) return 0;
     return Math.round((savings / packNormal) * 100);
   }, [savings, packNormal]);
 
+  const perDay = useMemo(() => {
+    // framing lembut: 30 hari pemakaian (rutinitas harian)
+    if (!canCheckout) return 0;
+    return Math.round(totalPrice / 30);
+  }, [canCheckout, totalPrice]);
+
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY || 0;
-      const shouldShow = y > showAfterPx;
-      setShow(shouldShow);
+      setShow(y > showAfterPx);
     };
 
     onScroll();
@@ -119,23 +118,29 @@ export default function StickyFloatingCTA({
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-semibold text-slate-600">
-              Checkout instan
+              Paket lengkap • Sekali beli, pakai berkali-kali
             </p>
 
             {canCheckout ? (
-              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="text-sm font-extrabold text-slate-900">
-                  {`Rp ${formatIDR(totalPrice)}`}
-                </span>
-                <span className="text-[11px] font-semibold text-slate-500 line-through">
-                  {`Rp ${formatIDR(packNormal)}`}
-                </span>
-                {savingsPct > 0 ? (
-                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700 ring-1 ring-emerald-200">
-                    Hemat {savingsPct}%
+              <>
+                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="text-sm font-extrabold text-slate-900">
+                    {formatIDR(totalPrice)}
                   </span>
-                ) : null}
-              </div>
+                  <span className="text-[11px] font-semibold text-slate-500 line-through">
+                    {formatIDR(packNormal)}
+                  </span>
+                  {savingsPct > 0 ? (
+                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700 ring-1 ring-emerald-200">
+                      Hemat {savingsPct}%
+                    </span>
+                  ) : null}
+                </div>
+
+                <p className="mt-0.5 text-[11px] font-semibold text-slate-600">
+                  ≈ {formatIDR(perDay)}/hari • Akses instan setelah bayar
+                </p>
+              </>
             ) : (
               <p className="mt-0.5 text-sm font-extrabold text-slate-900">
                 Pilih paket dulu
@@ -151,23 +156,26 @@ export default function StickyFloatingCTA({
                 scrollToPricingAndFocus();
                 return;
               }
-              open(checkoutUrl);
+              // ✅ full page redirect (same tab)
+              window.location.href = checkoutUrl;
             }}
+            disabled={!canCheckout}
+            aria-disabled={!canCheckout}
             className={[
-              "inline-flex h-12 items-center justify-center rounded-2xl px-4 text-sm font-extrabold transition active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-emerald-200",
+              "inline-flex h-12 items-center justify-center rounded-2xl px-4 text-sm font-extrabold transition focus:outline-none focus:ring-2 focus:ring-emerald-200",
               canCheckout
-                ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                : "bg-slate-200 text-slate-600",
+                ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
+                : "cursor-not-allowed bg-slate-200 text-slate-600",
             ].join(" ")}
           >
-            {canCheckout ? "Checkout & Download Instan" : "Pilih paket dulu"}
+            {canCheckout ? "Lanjut Bayar (Download Instan)" : "Pilih paket dulu"}
           </button>
         </div>
 
         {!canCheckout ? (
           <div className="mx-auto max-w-6xl px-4 pb-3">
             <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
-              Tap salah satu kartu paket di atas untuk mengaktifkan tombol checkout.
+              Tap salah satu kartu paket di atas untuk mengaktifkan tombol bayar.
             </div>
           </div>
         ) : null}

@@ -1,7 +1,5 @@
 "use client";
 
-import { useCheckoutModal } from "./CheckoutModalProvider";
-
 export default function CheckoutCTA({
   checkoutUrl,
   className = "",
@@ -9,14 +7,21 @@ export default function CheckoutCTA({
   checkoutUrl: string;
   className?: string;
 }) {
-  const { open } = useCheckoutModal();
+  const canGo = !!checkoutUrl;
 
   return (
     <button
       type="button"
-      onClick={() => open(checkoutUrl)}
+      onClick={() => {
+        if (!canGo) return;
+        window.location.href = checkoutUrl; // ✅ full-page redirect
+      }}
+      disabled={!canGo}
       className={[
-        "inline-flex h-10 items-center justify-center rounded-full bg-emerald-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 active:scale-[0.98]",
+        "inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-extrabold transition focus:outline-none focus:ring-2 focus:ring-emerald-200",
+        canGo
+          ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
+          : "cursor-not-allowed bg-slate-200 text-slate-600",
         className,
       ].join(" ")}
     >
