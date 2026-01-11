@@ -87,12 +87,16 @@ export default function HeroSection({
              
             
 
-<p className="mt-2 max-w-xl text-sm text-slate-700">
-  <span className="font-semibold text-slate-900">Sekali beli</span>, bisa dipakai berulang &amp; diprint kapan pun.
-  Dengan isi 1.000+ lembar, jatuhnya sekitar{" "}
-  <span className="font-extrabold text-slate-900">Rp {formatIDR(perPage)}</span>{" "}
-  per lembar.
-</p>
+<div className="mt-2 flex max-w-xl flex-wrap items-center gap-2 text-sm text-slate-700">
+  <span className="font-semibold text-slate-900">Sekali beli</span>
+  <span className="text-slate-400">•</span>
+  <span>Print ulang kapan pun</span>
+  <span className="text-slate-400">•</span>
+  <span className="font-semibold text-slate-900">Basic 1.000 lembar</span>
+  <span className="text-slate-400">•</span>
+  <span className="font-extrabold text-slate-900">≈ Rp {formatIDR(perPage)}</span>
+  <span className="text-slate-600">/lembar</span>
+</div>
 </div>
 
             <ul className="mt-5 space-y-2 text-sm text-slate-700">

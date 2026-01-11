@@ -18,7 +18,7 @@ type Plan = {
 
 const PAGES: Record<PlanId, number> = {
   basic: 1000,
-  bundle: 1000, // tetap konservatif untuk konsistensi di LP Islami
+  bundle: 1500, // tetap konservatif untuk konsistensi di LP Islami
 };
 
 export const COMPARE_AT: Record<PlanId, number> = {
@@ -411,6 +411,7 @@ export default function PricingSection({
             const desc = planDesc(plan.id);
             const features = planFeatures(plan.id);
             const planCompareAt = COMPARE_AT[plan.id];
+            const pages = PAGES[plan.id];
 
             return (
               <div
@@ -456,7 +457,7 @@ export default function PricingSection({
     Sekali beli • print ulang seumur hidup
   </span>
   <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-800 ring-1 ring-emerald-200">
-    ≈ Rp {formatIDR(Math.round(plan.price / 1000))}/lembar
+    ≈ Rp {formatIDR(Math.round(plan.price / pages))}/lembar
   </span>
 </div>
 

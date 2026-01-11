@@ -61,11 +61,6 @@ export default function StickyFloatingCTA({
     if (packNormal <= 0) return 0;
     return Math.round((savings / packNormal) * 100);
   }, [savings, packNormal]);
-
-  const perDay = useMemo(() => {
-    // framing lembut: 30 hari pemakaian (rutinitas harian)
-    if (!canCheckout) return 0;
-    return Math.round(totalPrice / 30);
   }, [canCheckout, totalPrice]);
 
   useEffect(() => {
@@ -115,11 +110,9 @@ export default function StickyFloatingCTA({
       )}
 
       <div className="fixed bottom-0 left-0 right-0 z-[50] border-t border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3">
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold text-slate-600">
-              Paket lengkap • Sekali beli, pakai berkali-kali
-            </p>
+            <p className="text-[11px] font-semibold text-slate-600">Checkout instan</p>
 
             {canCheckout ? (
               <>
@@ -137,15 +130,8 @@ export default function StickyFloatingCTA({
                   ) : null}
                 </div>
 
-<p className="mt-1 text-[11px] font-semibold text-slate-600">
-  Sekali beli, bisa dipakai berulang • ≈ Rp {formatIDR(Math.round(packPromo / 1000))}/lembar
-</p>
-
-
-                <p className="mt-0.5 text-[11px] font-semibold text-slate-600">
-                  ≈ {formatIDR(perDay)}/hari • Akses instan setelah bayar
-                </p>
-              </>
+<p className="mt-1 text-[11px] font-semibold text-slate-600">Sekali beli • print ulang seumur hidup</p>
+</>
             ) : (
               <p className="mt-0.5 text-sm font-extrabold text-slate-900">
                 Pilih paket dulu
@@ -155,7 +141,7 @@ export default function StickyFloatingCTA({
 
           <button
             type="button"
-            onClick={() => {
+            aria-            onClick={() => {
               if (!canCheckout) {
                 showToast("Pilih salah satu paket dulu ya 😊");
                 scrollToPricingAndFocus();
@@ -164,16 +150,15 @@ export default function StickyFloatingCTA({
               // ✅ full page redirect (same tab)
               window.location.href = checkoutUrl;
             }}
-            disabled={!canCheckout}
-            aria-disabled={!canCheckout}
+            aria-
             className={[
               "inline-flex h-12 items-center justify-center rounded-2xl px-4 text-sm font-extrabold transition focus:outline-none focus:ring-2 focus:ring-emerald-200",
               canCheckout
                 ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
-                : "cursor-not-allowed bg-slate-200 text-slate-600",
+                : "bg-slate-200 text-slate-700 hover:bg-slate-300",
             ].join(" ")}
           >
-            {canCheckout ? "Lanjut Bayar (Download Instan)" : "Pilih paket dulu"}
+            {canCheckout ? "Lanjut Bayar" : "Pilih paket dulu"}
           </button>
         </div>
 
