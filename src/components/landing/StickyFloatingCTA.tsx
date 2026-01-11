@@ -149,7 +149,7 @@ export default function StickyFloatingCTA({
               // ✅ full page redirect (same tab)
               window.location.href = checkoutUrl;
             }}
-            aria-
+            aria-disabled={!canCheckout}
             className={[
               "inline-flex h-12 items-center justify-center rounded-2xl px-4 text-sm font-extrabold transition focus:outline-none focus:ring-2 focus:ring-emerald-200",
               canCheckout
