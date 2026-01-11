@@ -48,14 +48,14 @@ function Modal({
         onClick={onClose}
         aria-hidden="true"
       />
-      <div className="absolute inset-0 flex items-center justify-center p-4">
+      <div className="absolute inset-0 flex items-end justify-center p-4 sm:items-center">
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
-          className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
+          className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl max-h-[85vh] sm:max-h-[80vh]"
         >
-          <div className="flex items-start justify-between gap-3">
+          <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-100 bg-white px-5 py-4">
             <div className="min-w-0">
               <p id={titleId} className="text-base font-extrabold text-slate-900">
                 {title}
@@ -75,9 +75,10 @@ function Modal({
             </button>
           </div>
 
-          <div className="mt-4">{children}</div>
+          <div className="overflow-y-auto px-5 pb-5 pt-4">
+            <div className="mt-0">{children}</div>
 
-          <button
+            <button
             type="button"
             onClick={onClose}
             className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
