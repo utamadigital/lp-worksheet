@@ -53,7 +53,7 @@ function Modal({
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
-          className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl max-h-[85vh] sm:max-h-[80vh]"
+          className="w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl max-h-[85vh] sm:max-h-[80vh]"
         >
           <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-100 bg-white px-5 py-4">
             <div className="min-w-0">
@@ -81,7 +81,7 @@ function Modal({
             <button
             type="button"
             onClick={onClose}
-            className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-extrabold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
+            className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-2xl bg-slate-900 text-sm font-extrabold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
           >
             Tutup
           </button>
@@ -126,10 +126,10 @@ export default function BundleContentsBox({ className }: Props) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-emerald-700 px-3 py-1 text-[11px] font-extrabold text-white">
+            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
               ISI PAKET BUNDLE
             </span>
-            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-emerald-800 ring-1 ring-emerald-200">
+            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
               2 paket dalam 1 checkout
             </span>
           </div>
@@ -169,7 +169,7 @@ export default function BundleContentsBox({ className }: Props) {
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <div className="flex items-start gap-3">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 ring-1 ring-emerald-100">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100">
               <FileText className="h-5 w-5 text-emerald-700" />
             </span>
             <div className="min-w-0">
@@ -190,7 +190,7 @@ export default function BundleContentsBox({ className }: Props) {
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <div className="flex items-start gap-3">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 ring-1 ring-emerald-100">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100">
               <Layers className="h-5 w-5 text-emerald-700" />
             </span>
             <div className="min-w-0">
@@ -207,12 +207,12 @@ export default function BundleContentsBox({ className }: Props) {
             {umumPreview.map((t) => (
               <span
                 key={t}
-                className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200"
+                className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200"
               >
                 {t}
               </span>
             ))}
-            <span className="inline-flex items-center rounded-full bg-slate-900/5 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
+            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
               +{umumRest.length} seri lainnya
             </span>
           </div>
