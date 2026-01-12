@@ -11,6 +11,14 @@ function percentOff(compareAt: number, price: number) {
   return Math.round(((compareAt - price) / compareAt) * 100);
 }
 
+function scrollToCheckoutSummary() {
+  const el = document.getElementById("checkout-summary");
+  if (!el) return;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+  el.classList.add("ud-highlight");
+  window.setTimeout(() => el.classList.remove("ud-highlight"), 1400);
+}
+
 export default function QuickPickSection({
   selectedId,
   onPick,
@@ -40,7 +48,7 @@ export default function QuickPickSection({
   }> = [
     {
       id: "basic",
-      title: "Basic (mulai dari sini)",
+      title: "Basic (1.000 halaman)",
       subtitle:
         "Cocok untuk mulai rutinitas - anak bisa langsung aktivitas harian tanpa gadget.",
       badgeText: "Terlaris",
@@ -50,9 +58,9 @@ export default function QuickPickSection({
     },
     {
       id: "bundle",
-      title: "Bundle (paling worth it)",
+      title: "Bundle (1.500 halaman)",
       subtitle:
-        "Cocok kalau ingin variasi lebih banyak & dipakai lebih lama (nggak cepat bosan).",
+        "Cocok kalau ingin variasi lebih banyak & dipakai lebih lama (lebih worth it: +500 halaman).",
       badgeText: "Value Terbesar",
       badgeTone: "emerald",
       price: bundlePrice,
@@ -63,7 +71,10 @@ export default function QuickPickSection({
   const selectedPrice = items.find((x) => x.id === selectedId)?.price ?? 0;
 
   return (
-    <section className="mx-auto max-w-screen-xl px-5 sm:px-6 lg:px-10 pt-6">
+    <section
+      id="quick-pick"
+      className="mx-auto max-w-screen-xl px-5 sm:px-6 lg:px-10 pt-6"
+    >
       <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -172,7 +183,7 @@ export default function QuickPickSection({
 
           {selectedId ? (
             <a
-              href="#pricing"
+              href="#checkout-summary"
               className="inline-flex h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-sm font-extrabold text-slate-900 shadow-sm transition hover:bg-slate-50 active:scale-[0.99] focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-200"
             >
               Lanjut ke Ringkasan • Rp {formatIDR(selectedPrice)}

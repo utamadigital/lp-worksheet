@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState, useId } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown, FileText, Layers } from "lucide-react";
+import BottomSheetModal from "./BottomSheetModal";
 
 type Props = {
   className?: string;
@@ -28,71 +29,7 @@ function Item({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Modal({
-  titleId,
-  onClose,
-  title,
-  subtitle,
-  children,
-}: {
-  titleId: string;
-  onClose: () => void;
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="fixed inset-0 z-[80]">
-      <div
-        className="absolute inset-0 bg-slate-900/40"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div className="absolute inset-0 flex items-end justify-center p-4 sm:items-center">
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={titleId}
-          className="w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl max-h-[85vh] sm:max-h-[80vh]"
-        >
-          <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-slate-100 bg-white px-5 py-4">
-            <div className="min-w-0">
-              <p id={titleId} className="text-base font-extrabold text-slate-900">
-                {title}
-              </p>
-              {subtitle ? (
-                <p className="mt-1 text-xs text-slate-600">{subtitle}</p>
-              ) : null}
-            </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100"
-              aria-label="Tutup"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="overflow-y-auto px-5 pb-5 pt-4">
-            <div className="mt-0">{children}</div>
-
-            <button
-            type="button"
-            onClick={onClose}
-            className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-2xl bg-slate-900 text-sm font-extrabold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
-          >
-            Tutup
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function BundleContentsBox({ className }: Props) {
-  const modalTitleId = useId();
   const [show, setShow] = useState(false);
 
   const umumSeries = useMemo(
@@ -126,10 +63,10 @@ export default function BundleContentsBox({ className }: Props) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
+            <span className="inline-flex items-center rounded-full bg-emerald-700 px-3 py-1 text-[11px] font-extrabold text-white">
               ISI PAKET BUNDLE
             </span>
-            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
+            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-emerald-800 ring-1 ring-emerald-200">
               2 paket dalam 1 checkout
             </span>
           </div>
@@ -150,7 +87,7 @@ export default function BundleContentsBox({ className }: Props) {
           </div>
         </div>
 
-        {/* ✅ tombol Detail -> POPUP */}
+        {/* tombol Detail -> modal (mobile-safe) */}
         <button
           type="button"
           onClick={(e) => {
@@ -169,7 +106,7 @@ export default function BundleContentsBox({ className }: Props) {
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <div className="flex items-start gap-3">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 ring-1 ring-emerald-100">
               <FileText className="h-5 w-5 text-emerald-700" />
             </span>
             <div className="min-w-0">
@@ -190,7 +127,7 @@ export default function BundleContentsBox({ className }: Props) {
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
           <div className="flex items-start gap-3">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 ring-1 ring-emerald-100">
               <Layers className="h-5 w-5 text-emerald-700" />
             </span>
             <div className="min-w-0">
@@ -207,44 +144,43 @@ export default function BundleContentsBox({ className }: Props) {
             {umumPreview.map((t) => (
               <span
                 key={t}
-                className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200"
+                className="inline-flex items-center rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200"
               >
                 {t}
               </span>
             ))}
-            <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
+            <span className="inline-flex items-center rounded-full bg-slate-900/5 px-2.5 py-1 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200">
               +{umumRest.length} seri lainnya
             </span>
           </div>
         </div>
       </div>
 
-      {/* ✅ POPUP Detail */}
-      {show ? (
-        <Modal
-          titleId={modalTitleId}
-          onClose={() => setShow(false)}
-          title="Detail 12 Seri Worksheet Umum"
-          subtitle="Cocok untuk selingan aktivitas harian setelah sesi Islami. Total lebih dari 1.200 lembar."
-        >
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <div className="grid gap-2 sm:grid-cols-2">
-              {umumSeries.map((t) => (
-                <div
-                  key={t}
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
-                >
-                  {t}
-                </div>
-              ))}
-            </div>
-
-            <p className="mt-3 text-[11px] text-slate-500">
-              
-            </p>
+      {/* Modal Detail (mobile bottom sheet) */}
+      <BottomSheetModal
+        open={show}
+        onClose={() => setShow(false)}
+        title="Detail 12 Seri Worksheet Umum"
+        subtitle="Cocok untuk selingan aktivitas harian setelah sesi Islami. Total lebih dari 1.200 lembar."
+        zIndexClassName="z-[110]"
+      >
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+          <div className="grid gap-2 sm:grid-cols-2">
+            {umumSeries.map((t) => (
+              <div
+                key={t}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
+              >
+                {t}
+              </div>
+            ))}
           </div>
-        </Modal>
-      ) : null}
+
+          <p className="mt-3 text-[11px] text-slate-500">
+            Tips: pilih 1–2 seri untuk "pemanasan" atau penutup sesi agar anak tetap anteng.
+          </p>
+        </div>
+      </BottomSheetModal>
     </div>
   );
 }

@@ -55,7 +55,10 @@ function IconHome({ className }: { className?: string }) {
 
 export default function GuaranteeSection({ ctaHref = "#pricing" }: { ctaHref?: string }) {
   return (
-    <section className="mx-auto max-w-screen-xl px-5 sm:px-6 lg:px-10 pb-16">
+    <section
+      id="guarantee"
+      className="mx-auto max-w-screen-xl px-5 sm:px-6 lg:px-10 pb-16"
+    >
       <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm md:p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>

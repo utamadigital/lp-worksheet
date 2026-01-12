@@ -2,7 +2,9 @@
 
 import React from "react";
 import { CheckCircle2, Sparkles, ShieldCheck, Printer, Zap } from "lucide-react";
-import PdfFlipbook, { type FlipPage } from "./PdfFlipbook";
+import dynamic from "next/dynamic";
+import type { FlipPage } from "./PdfFlipbook";
+const PdfFlipbook = dynamic(() => import("./PdfFlipbook"), { ssr: false });
 
 
 const WHATSAPP_NUMBER = "6289654543003";
@@ -85,15 +87,7 @@ export default function HeroSection({
                 <span className="font-extrabold">Promo Rp {formatIDR(promo)}</span>
               </span>
              
-            
-
-<p className="mt-2 max-w-xl text-sm text-slate-700">
-  <span className="font-semibold text-slate-900">Sekali beli</span>, bisa dipakai berulang &amp; diprint kapan pun.
-  Dengan isi 1.000+ lembar, jatuhnya sekitar{" "}
-  <span className="font-extrabold text-slate-900">Rp {formatIDR(perPage)}</span>{" "}
-  per lembar.
-</p>
-</div>
+            </div>
 
             <ul className="mt-5 space-y-2 text-sm text-slate-700">
               {[

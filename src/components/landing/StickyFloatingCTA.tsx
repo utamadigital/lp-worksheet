@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { PlanId } from "./PricingSection";
 
 function formatIDR(n: number) {
   return `Rp ${Math.round(n).toLocaleString("id-ID")}`;
@@ -26,13 +27,15 @@ function scrollToPricingAndFocus() {
 }
 
 export default function StickyFloatingCTA({
+  selectedId,
   checkoutUrl,
   promoPrice,
   compareAtPrice,
   bumpSelected,
   bumpPrice,
-  showAfterPx = 520,
+  showAfterPx = 0,
 }: {
+  selectedId: PlanId | null;
   checkoutUrl: string;
   promoPrice: number;
   compareAtPrice: number;
@@ -42,6 +45,7 @@ export default function StickyFloatingCTA({
   showAfterPx?: number;
 }) {
   const [show, setShow] = useState(false);
+  const [hideBecauseSection, setHideBecauseSection] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // ✅ hanya aktif jika paket sudah dipilih
@@ -68,6 +72,16 @@ export default function StickyFloatingCTA({
     return Math.round(totalPrice / 30);
   }, [canCheckout, totalPrice]);
 
+  const pages = selectedId === "bundle" ? 1500 : 1000;
+  const priceForCalc = canCheckout ? totalPrice : 69000;
+  const perSheet = useMemo(() => {
+    return Math.max(1, Math.round(priceForCalc / pages));
+  }, [priceForCalc, pages]);
+
+  const perSheetLabel = useMemo(() => {
+    return `Rp ${new Intl.NumberFormat("id-ID").format(perSheet)}`;
+  }, [perSheet]);
+
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY || 0;
@@ -79,12 +93,54 @@ export default function StickyFloatingCTA({
     return () => window.removeEventListener("scroll", onScroll);
   }, [showAfterPx]);
 
+  // Sembunyikan hanya saat berada di blok Ringkasan Checkout (biar nggak nutup summary)
+  useEffect(() => {
+    const ids = ["checkout-summary"];
+    const els = ids
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+
+    if (!els.length) return;
+
+    let mounted = true;
+    const state: Record<string, boolean> = {};
+
+    const recompute = () => {
+      if (!mounted) return;
+      const anyVisible = Object.values(state).some(Boolean);
+      setHideBecauseSection(anyVisible);
+    };
+
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const id = (e.target as HTMLElement).id;
+          state[id] = e.isIntersecting;
+        }
+        recompute();
+      },
+      {
+        // agak longgar: begitu section mulai terlihat, hide
+        threshold: 0.12,
+        rootMargin: "-10% 0px -55% 0px",
+      }
+    );
+
+    els.forEach((el) => obs.observe(el));
+    return () => {
+      mounted = false;
+      obs.disconnect();
+    };
+  }, []);
+
   function showToast(msg: string) {
     setToast(msg);
     window.setTimeout(() => setToast(null), 1600);
   }
 
-  if (!show) return null;
+  if (!show || hideBecauseSection) return null;
+
+  const pageLabel = selectedId === "basic" ? "1.000" : selectedId === "bundle" ? "1.500" : null;
 
   return (
     <>
@@ -114,76 +170,71 @@ export default function StickyFloatingCTA({
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 z-[50] border-t border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold text-slate-600">
-              Paket lengkap • Sekali beli, pakai berkali-kali
-            </p>
-
-            {canCheckout ? (
-              <>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="text-sm font-extrabold text-slate-900">
-                    {formatIDR(totalPrice)}
-                  </span>
-                  <span className="text-[11px] font-semibold text-slate-500 line-through">
-                    {formatIDR(packNormal)}
-                  </span>
-                  {savingsPct > 0 ? (
-                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700 ring-1 ring-emerald-200">
-                      Hemat {savingsPct}%
-                    </span>
-                  ) : null}
-                </div>
-
-<p className="mt-1 text-[11px] font-semibold text-slate-600">
-  Sekali beli, bisa dipakai berulang • ≈ Rp {formatIDR(Math.round(packPromo / 1000))}/lembar
-</p>
-
-
-                <p className="mt-0.5 text-[11px] font-semibold text-slate-600">
-                  ≈ {formatIDR(perDay)}/hari • Akses instan setelah bayar
-                </p>
-              </>
-            ) : (
-              <p className="mt-0.5 text-sm font-extrabold text-slate-900">
-                Pilih paket dulu
-              </p>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              if (!canCheckout) {
-                showToast("Pilih salah satu paket dulu ya 😊");
-                scrollToPricingAndFocus();
-                return;
-              }
-              // ✅ full page redirect (same tab)
-              window.location.href = checkoutUrl;
-            }}
-            disabled={!canCheckout}
-            aria-disabled={!canCheckout}
-            className={[
-              "inline-flex h-12 items-center justify-center rounded-2xl px-4 text-sm font-extrabold transition focus:outline-none focus:ring-2 focus:ring-emerald-200",
-              canCheckout
-                ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
-                : "cursor-not-allowed bg-slate-200 text-slate-600",
-            ].join(" ")}
+      <div className="fixed bottom-4 left-0 right-0 z-[80]">
+        <div className="mx-auto max-w-xl px-4">
+          <div
+            className="rounded-3xl border border-slate-200 bg-white/95 shadow-lg backdrop-blur"
+            style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 0px)" }}
           >
-            {canCheckout ? "Lanjut Bayar (Download Instan)" : "Pilih paket dulu"}
-          </button>
-        </div>
+            <div className="grid grid-cols-[1fr_auto] items-center gap-3 p-3 sm:p-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-semibold text-slate-600">
+                  <>Checkout instan</>
+                </p>
 
-        {!canCheckout ? (
-          <div className="mx-auto max-w-6xl px-4 pb-3">
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-900">
-              Tap salah satu kartu paket di atas untuk mengaktifkan tombol bayar.
+                {canCheckout ? (
+                  <>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="whitespace-nowrap text-sm font-extrabold text-slate-900">
+                        {formatIDR(totalPrice)}
+                      </span>
+                      <span className="whitespace-nowrap text-[11px] font-semibold text-slate-500 line-through">
+                        {formatIDR(packNormal)}
+                      </span>
+                      
+                    </div>
+
+                    <p className="mt-0.5 text-[11px] font-semibold text-slate-600">
+                      ≈ {perSheetLabel}/lembar • Gratis update worksheet
+                    </p>
+                  </>
+                ) : (
+                  <p className="mt-0.5 text-[11px] font-semibold text-slate-600">
+                    ≈ {perSheetLabel}/lembar • Gratis update worksheet
+                  </p>
+                )}
+              </div>
+
+              <div className="flex shrink-0 flex-col items-end gap-1">
+  {savingsPct > 0 && canCheckout ? (
+    <div className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700 ring-1 ring-emerald-200">
+      Hemat {savingsPct}%
+    </div>
+  ) : null}
+
+  <button
+    type="button"
+    onClick={() => {
+      if (!canCheckout) {
+        showToast("Pilih salah satu paket dulu ya 😊");
+        scrollToPricingAndFocus();
+        return;
+      }
+      window.location.href = checkoutUrl;
+    }}
+    className={[
+      "inline-flex h-12 w-[190px] items-center justify-center rounded-xl px-4 text-sm font-extrabold shadow-sm outline-none ring-1 ring-black/5 focus:ring-2 focus:ring-emerald-200 whitespace-nowrap",
+      canCheckout
+        ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
+        : "bg-slate-200 text-slate-700 hover:bg-slate-300",
+    ].join(" ")}
+  >
+    {canCheckout ? "Lanjut Bayar" : "Pilih Paket"}
+  </button>
+</div>
             </div>
           </div>
-        ) : null}
+        </div>
       </div>
     </>
   );

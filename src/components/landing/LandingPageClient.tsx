@@ -149,6 +149,7 @@ export default function LandingPageClient() {
 
         {/* Floating CTA */}
         <StickyFloatingCTA
+          selectedId={selectedId}
           checkoutUrl={checkoutUrl}
           promoPrice={promoPrice}
           compareAtPrice={compareAtPrice}
