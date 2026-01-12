@@ -26,6 +26,47 @@ function scrollToPricingAndFocus() {
   }, 450);
 }
 
+function useLoopingCountdown(key = "lp_countdown_end_v1", seconds = 30 * 60) {
+  // SSR & first client render sama => menghindari hydration mismatch
+  const [remain, setRemain] = useState(seconds); // 1800 = 30:00
+
+  useEffect(() => {
+    const getEnd = () => {
+      const raw = window.localStorage.getItem(key);
+      const parsed = raw ? Number(raw) : NaN;
+      if (!Number.isFinite(parsed) || parsed <= 0) return 0;
+      return parsed;
+    };
+
+    const setNewEnd = () => {
+      const end = Date.now() + seconds * 1000;
+      window.localStorage.setItem(key, String(end));
+      return end;
+    };
+
+    let endAt = getEnd();
+    if (!endAt || endAt < Date.now()) endAt = setNewEnd();
+
+    const tick = () => {
+      const diff = Math.ceil((endAt - Date.now()) / 1000);
+      if (diff <= 0) {
+        endAt = setNewEnd(); // looping
+        setRemain(seconds);
+      } else {
+        setRemain(diff);
+      }
+    };
+
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [key, seconds]);
+
+  const mm = String(Math.floor(remain / 60)).padStart(2, "0");
+  const ss = String(remain % 60).padStart(2, "0");
+  return `${mm}:${ss}`;
+}
+
 export default function StickyFloatingCTA({
   selectedId,
   checkoutUrl,
@@ -59,7 +100,10 @@ export default function StickyFloatingCTA({
     [packPromo, bumpSelected, bumpPrice]
   );
 
-  const savings = useMemo(() => Math.max(0, packNormal - packPromo), [packNormal, packPromo]);
+  const savings = useMemo(
+    () => Math.max(0, packNormal - packPromo),
+    [packNormal, packPromo]
+  );
 
   const savingsPct = useMemo(() => {
     if (packNormal <= 0) return 0;
@@ -81,6 +125,9 @@ export default function StickyFloatingCTA({
   const perSheetLabel = useMemo(() => {
     return `Rp ${new Intl.NumberFormat("id-ID").format(perSheet)}`;
   }, [perSheet]);
+
+  // Countdown looping 30:00 (tampil saat bisa checkout & ada diskon)
+  const countdown = useLoopingCountdown("lp_countdown_end_v1", 30 * 60);
 
   useEffect(() => {
     const onScroll = () => {
@@ -140,7 +187,8 @@ export default function StickyFloatingCTA({
 
   if (!show || hideBecauseSection) return null;
 
-  const pageLabel = selectedId === "basic" ? "1.000" : selectedId === "bundle" ? "1.500" : null;
+  const pageLabel =
+    selectedId === "basic" ? "1.000" : selectedId === "bundle" ? "1.500" : null;
 
   return (
     <>
@@ -191,7 +239,6 @@ export default function StickyFloatingCTA({
                       <span className="whitespace-nowrap text-[11px] font-semibold text-slate-500 line-through">
                         {formatIDR(packNormal)}
                       </span>
-                      
                     </div>
 
                     <p className="mt-0.5 text-[11px] font-semibold text-slate-600">
@@ -206,32 +253,38 @@ export default function StickyFloatingCTA({
               </div>
 
               <div className="flex shrink-0 flex-col items-end gap-1">
-  {savingsPct > 0 && canCheckout ? (
-    <div className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700 ring-1 ring-emerald-200">
-      Hemat {savingsPct}%
-    </div>
-  ) : null}
+                {/* Countdown + Hemat (di atas tombol CTA) */}
+                {savingsPct > 0 && canCheckout ? (
+                  <div className="flex items-center justify-end gap-2">
+                    <div className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-extrabold text-amber-700 ring-1 ring-amber-200">
+                      {countdown}
+                    </div>
+                    <div className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-extrabold text-emerald-700 ring-1 ring-emerald-200">
+                      Hemat {savingsPct}%
+                    </div>
+                  </div>
+                ) : null}
 
-  <button
-    type="button"
-    onClick={() => {
-      if (!canCheckout) {
-        showToast("Pilih salah satu paket dulu ya 😊");
-        scrollToPricingAndFocus();
-        return;
-      }
-      window.location.href = checkoutUrl;
-    }}
-    className={[
-      "inline-flex h-12 w-[190px] items-center justify-center rounded-xl px-4 text-sm font-extrabold shadow-sm outline-none ring-1 ring-black/5 focus:ring-2 focus:ring-emerald-200 whitespace-nowrap",
-      canCheckout
-        ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
-        : "bg-slate-200 text-slate-700 hover:bg-slate-300",
-    ].join(" ")}
-  >
-    {canCheckout ? "Lanjut Bayar" : "Pilih Paket"}
-  </button>
-</div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!canCheckout) {
+                      showToast("Pilih salah satu paket dulu ya 😊");
+                      scrollToPricingAndFocus();
+                      return;
+                    }
+                    window.location.href = checkoutUrl;
+                  }}
+                  className={[
+                    "inline-flex h-12 w-[190px] items-center justify-center rounded-xl px-4 text-sm font-extrabold shadow-sm outline-none ring-1 ring-black/5 focus:ring-2 focus:ring-emerald-200 whitespace-nowrap",
+                    canCheckout
+                      ? "bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99]"
+                      : "bg-slate-200 text-slate-700 hover:bg-slate-300",
+                  ].join(" ")}
+                >
+                  {canCheckout ? "Lanjut Bayar" : "Pilih Paket"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
