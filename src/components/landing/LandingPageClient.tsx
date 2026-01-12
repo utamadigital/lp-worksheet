@@ -51,6 +51,9 @@ export default function LandingPageClient() {
   // ✅ Guard super-aman: cegah double fire bahkan saat spam tap sangat cepat
   const lastSelectedRef = useRef<PlanId | null>(null);
 
+  // ✅ ATC hanya 1x: saat pertama kali user memilih paket (pindah paket tidak hitung ATC)
+  const atcFiredRef = useRef(false);
+
   // ✅ AddToCart hanya saat user benar-benar memilih paket (bukan default)
   const handleSelectPlan = (id: PlanId) => {
     // jika klik kartu yg sama, jangan trigger lagi
@@ -62,13 +65,24 @@ export default function LandingPageClient() {
 
     const value = id === "basic" ? PRICE_BASIC : PRICE_BUNDLE;
 
-    track("AddToCart", {
-      content_type: "product",
-      content_ids: [id],
-      content_name: id === "basic" ? "Basic" : "Bundle",
-      value,
-      currency: "IDR",
-    });
+    // ✅ Fire AddToCart hanya saat pertama kali user memilih paket
+    if (!atcFiredRef.current && selectedId === null) {
+      atcFiredRef.current = true;
+      try {
+        if (typeof window !== "undefined") {
+          window.sessionStorage.setItem("ud_atc_fired", "1");
+        }
+      } catch {}
+
+      track("AddToCart", {
+        content_type: "product",
+        content_ids: [id],
+        content_name: id === "basic" ? "Basic" : "Bundle",
+        value,
+        currency: "IDR",
+      });
+    }
+
 
     setSelectedId(id);
   };
